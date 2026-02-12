@@ -112,6 +112,7 @@ iOS integration will require the iOS Shortcuts app and iOS Reminders app.
 
 The shortcut shown below will allow for your iOS device to connect to the URL, extract the assignment data, and parse it into individual reminders.
 
-
-
-   
+<img width="429" height="883" alt="image" src="https://github.com/user-attachments/assets/8104700d-618b-4ca1-a78d-6034be03307d"/>
+<img width="429" height="883" alt="image" src="https://github.com/user-attachments/assets/73b229b1-606b-4594-a902-0a257e5441a5"/>
+<img width="429" height="883" alt="image" src="https://github.com/user-attachments/assets/1e7f3e0c-1325-41c0-9b33-f7f3cc2ef519"/>
+<img width="429" height="883" alt="image" src="https://github.com/user-attachments/assets/ae255a99-f3d3-44b6-9af8-f0597b6f609f"/>
