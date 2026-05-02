@@ -59,7 +59,7 @@ class CanvasApiAssignments:
         query = '''
         query AllUpcomingAssignments {
             allCourses {
-                name
+                courseCode
                 assignmentsConnection(first: 100) {
                     nodes {
                         name
@@ -137,6 +137,8 @@ class CanvasApiAssignments:
         weeks_future = curr_date + datetime.timedelta(weeks = weeks_delta)
 
         for course in assignments['data']['allCourses']:
+            course_code_split = course['courseCode'].split()
+            
             for assignment in course['assignmentsConnection']['nodes']:
                 assignment_due_date = assignment.get("dueAt")
 
@@ -149,12 +151,24 @@ class CanvasApiAssignments:
                     assignment_due_date.replace("Z", "+00:00"))
 
                 if due_date_dt >= curr_date and due_date_dt <= weeks_future:
+                    # Use only the first two strings in the courseCode
+                    # as the course's title if the courseCode is at
+                    # least two strings long. Otherwise just use the
+                    # entire courseCode.
+                    # 
+                    # This should make the course title only the
+                    # abbreviated course department and the course
+                    # number (ex: MATH 1). 
+                    if len(course_code_split) >= 2:
+                        course_title = " ".join(course_code_split[:2])
+                    else:
+                        course_title = course['courseCode']
+
                     due_assignments.append({
-                        "course": course['name'],
+                        "course": course_title,
                         "assignment": assignment['name'],
                         "dueAt": assignment_due_date
                         })
-
 
         return due_assignments
 
@@ -181,4 +195,3 @@ def run():
 
 if __name__ == '__main__':
     run()
-
