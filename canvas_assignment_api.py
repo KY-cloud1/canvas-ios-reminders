@@ -18,7 +18,7 @@ from config import CANVAS_GRAPHQL_URL, CANVAS_TOKEN
 WEEKS_DELTA = 2
 
 
-class CanvasApiAssignments:
+class CanvasApi:
     """
     Provides methods to interact with the Canvas GraphQL API and
     retrieve assignment data for enrolled courses.
@@ -26,8 +26,8 @@ class CanvasApiAssignments:
 
     def __init__(self, url: str, token: str) -> None:
         """
-        Initializes a CanvasApiAssignments instance with the Canvas
-        GraphQL API endpoint and user authentication token.
+        Initializes a CanvasApi instance with the Canvas GraphQL API
+        endpoint and user authentication token.
 
         Args:
             url: The Canvas GraphQL API endpoint URL.
@@ -166,7 +166,7 @@ def run():
     Entry point for testing the Canvas API integration locally.
     Retrieves upcoming assignments and prints them to the console.
     """
-    canvas_api = CanvasApiAssignments(CANVAS_GRAPHQL_URL, CANVAS_TOKEN)
+    canvas_api = CanvasApi(CANVAS_GRAPHQL_URL, CANVAS_TOKEN)
 
     assignments = canvas_api.get_all_assignments()
 

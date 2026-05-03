@@ -8,7 +8,7 @@ assignment data as a JSON API using Uvicorn.
 import fastapi
 import uvicorn
 
-from canvas_assignment_api import CanvasApiAssignments
+from canvas_assignment_api import CanvasApi
 from config import CANVAS_GRAPHQL_URL, CANVAS_TOKEN
 
 
@@ -35,7 +35,7 @@ def get_upcoming_assignments():
     Returns:
         A list of dictionaries representing upcoming assignments.
     """
-    canvas_api = CanvasApiAssignments(CANVAS_GRAPHQL_URL, CANVAS_TOKEN)
+    canvas_api = CanvasApi(CANVAS_GRAPHQL_URL, CANVAS_TOKEN)
 
     assignments = canvas_api.get_all_assignments()
 
