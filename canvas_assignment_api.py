@@ -2,7 +2,7 @@
 
 '''
 This module contains a class that gets upcoming assignments from
-the UCI Canvas using the Canvas GraphQL API.
+the Canvas LMS using the Canvas GraphQL API.
 '''
 
 
@@ -21,18 +21,20 @@ WEEKS_DELTA = 2
 
 class CanvasApiAssignments:
     '''
-    Contains methods that fetch assignments from the Canvas 
-    GraphQL API.
+    Provides methods to interact with the Canvas GraphQL API and
+    retrieve assignment data for enrolled courses.
     '''
     def __init__(self, url: str, token: str) -> None:
         '''
-        Initializes a CanvasApiAssignments object by setting the
-        user's Canvas url and personal token.
-        
-        url represents a Canvas GraphQl API url.
-        token represents a Canvas access token.
+        Initializes a CanvasApiAssignments instance with the Canvas
+        GraphQL API endpoint and user authentication token.
 
-        Raises a ValueError if the given URL or token is None.
+        Args:
+            url: The Canvas GraphQL API endpoint URL.
+            token: A valid Canvas access token for authentication.
+
+        Raises:
+            ValueError: If either the URL or token is missing or invalid.
         '''
         # Ensure given url and token are not None.
         if not url or not token:
@@ -44,13 +46,16 @@ class CanvasApiAssignments:
 
     def get_all_assignments(self) -> dict:
         '''
-        Fetches all assignments in the current Canvas courses.
-        
-        Returns a dictionary containing all of the assignments with
-        names, ids, and due dates.
+        Fetches all assignments from all enrolled Canvas courses using
+        the GraphQL API.
 
-        Raises a ValueError if the Canvas API call failed or the call
-        result is invalid.
+        Returns:
+            A dictionary containing the raw API response with courses and
+            their associated assignments.
+
+        Raises:
+            ValueError: If the response is empty or contains invalid JSON.
+            ConnectionError: If the API request fails or cannot connect.
         '''
         # Canvas GraphQL query for course code and assignments with
         # due dates.
@@ -103,19 +108,16 @@ class CanvasApiAssignments:
     def filter_assignments_due(self, assignments: dict, 
                                weeks_delta: int) -> list[dict]:
         '''
-        
-        Filters given assignments by only selecting the ones that have
-        a due date on or after the current day and no later than the
-        weeks delta from the current date.
-        
-        assignments represents the data received from the Canvas API.
+        Filters Canvas assignments to include only those due within a
+        specified time range.
 
-        weeks_delta represents the number of weeks into the future from
-        the current date.
+        Args:
+            assignments: Raw assignment data returned from the Canvas API.
+            weeks_delta: Number of weeks into the future to include.
 
-        Returns a list of dicts containing only assignments that have
-        due dates on or after the current day and no later than the
-        weeks delta from the current day.
+        Returns:
+            A list of dictionaries containing filtered assignments with
+            course name, assignment name, and due date.
         '''
         due_assignments = []
 
@@ -162,8 +164,8 @@ class CanvasApiAssignments:
 
 def run():
     '''
-    Gets upcoming assignments from a user's UCI Canvas using their
-    token and prints it into the console.
+    Entry point for testing the Canvas API integration locally.
+    Retrieves upcoming assignments and prints them to the console.
     '''
     canvas_api = CanvasApiAssignments(CANVAS_GRAPHQL_URL, CANVAS_TOKEN)
 

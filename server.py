@@ -1,8 +1,8 @@
 # server.py
 
 '''
-This module contains a FastAPI application that uses Uvicorn (ASGI)
-to send JSON data.
+This module defines a FastAPI web server that exposes Canvas
+assignment data as a JSON API using Uvicorn.
 '''
 
 
@@ -28,8 +28,13 @@ app = fastapi.FastAPI()
 @app.get('/assignments')
 def get_upcoming_assignments():
     '''
-    Gets assignments from Canvas, filters into upcoming, and returns
-    the assignments as a list of dictionaries.
+    API endpoint that retrieves upcoming Canvas assignments.
+
+    The function fetches assignment data from Canvas, filters it
+    based on due dates, and returns it as JSON.
+
+    Returns:
+        A list of dictionaries representing upcoming assignments.
     '''
     canvas_api = CanvasApiAssignments(CANVAS_GRAPHQL_URL, CANVAS_TOKEN)
 
