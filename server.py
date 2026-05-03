@@ -35,9 +35,6 @@ def get_upcoming_assignments():
 
     assignments = canvas_api.get_all_assignments()
 
-    if not assignments:
-        return
-
     filtered_assignments = canvas_api.filter_assignments_due(assignments,
                                                              WEEKS_DELTA)
 
