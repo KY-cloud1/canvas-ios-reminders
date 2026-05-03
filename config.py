@@ -1,9 +1,9 @@
-#config.py
+# config.py
 
-'''
+"""
 This module loads user information from the .env file within the
 module's directory.
-'''
+"""
 
 import os
 
@@ -31,10 +31,10 @@ def get_env(name: str) -> str:
 
     if not value:
         raise ValueError(
-        f"No {name} was provided in the .env file.\n"
-        "Please review the README for instructions on how to setup the .env"
-        " file before rerunning the program.\n"
-    )
+            f"No {name} was provided in the .env file.\n"
+            "Please review the README for instructions on how to setup the .env"
+            " file before rerunning the program.\n"
+        )
 
     return value
 
