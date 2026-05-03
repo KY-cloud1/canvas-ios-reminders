@@ -1,3 +1,4 @@
 # Required third-party libraries for server.py.
 fastapi
 uvicorn
+python-dotenv

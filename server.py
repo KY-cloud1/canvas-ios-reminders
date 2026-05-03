@@ -6,9 +6,11 @@ to send JSON data.
 '''
 
 
-import canvas_assignment_api
 import fastapi
 import uvicorn
+
+from canvas_assignment_api import CanvasApiAssignments
+from config import CANVAS_GRAPHQL_URL, CANVAS_TOKEN 
 
 
 # This constant represents the port that the local server will run on.
@@ -29,10 +31,7 @@ def get_upcoming_assignments():
     Gets assignments from Canvas, filters into upcoming, and returns
     the assignments as a list of dictionaries.
     '''
-
-    # 'TOKEN' is currently unused as the Canvas token is hardcoded into
-    # the canvas_assignment_api module.
-    canvas_api = canvas_assignment_api.CanvasApiAssignments('TOKEN')
+    canvas_api = CanvasApiAssignments(CANVAS_GRAPHQL_URL, CANVAS_TOKEN)
 
     assignments = canvas_api.get_all_assignments()
 

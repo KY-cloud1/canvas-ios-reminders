@@ -10,14 +10,7 @@ import datetime
 import json
 import urllib.request
 
-
-# Canvas API Access Token goes here in the quotes.
-TOKEN = ""
-
-
-# URL specifically for Canvas used by UCI students.
-# This will need to be changed for different schools.
-BASE_URL = "https://canvas.eee.uci.edu/api/graphql"
+from config import CANVAS_GRAPHQL_URL, CANVAS_TOKEN 
 
 
 # Represents the number of weeks in the future to consider
@@ -30,18 +23,20 @@ class CanvasApiAssignments:
     Contains methods that fetch assignments from the Canvas 
     GraphQL API.
     '''
-
-    def __init__(self, token: str) -> None:
+    def __init__(self, url: str, token: str) -> None:
         '''
         Initializes a CanvasApiAssignments object by setting the
-        user's personal Canvas token.
+        user's Canvas url and personal token.
         
+        url represents a Canvas GraphQl API url.
         token represents a Canvas access token.
         '''
+        # Ensure given url and token are not None.
+        if not url or not token:
+            raise ValueError("Missing Canvas URL and/or token.")
 
-        # TOKEN is currently hardcoded at top of module, leaving the
-        # token parameter unused.
-        self._token = TOKEN
+        self.url = url
+        self._token = token
 
 
     def get_all_assignments(self) -> dict | None:
@@ -54,7 +49,6 @@ class CanvasApiAssignments:
         Returns None if the Canvas API call failed or the call result
         is invalid.
         '''
-
         # Canvas GraphQL query.
         query = '''
         query AllUpcomingAssignments {
@@ -68,7 +62,6 @@ class CanvasApiAssignments:
                 }
             }
         }
-        
         '''
 
         data = json.dumps({"query": query}).encode("utf-8")
@@ -79,7 +72,7 @@ class CanvasApiAssignments:
             }
 
         try:
-            request = urllib.request.Request(BASE_URL, 
+            request = urllib.request.Request(self.url, 
                                              data = data, 
                                              headers = headers, 
                                              method = "POST")
@@ -129,7 +122,6 @@ class CanvasApiAssignments:
         due dates on or after the current day and no later than the
         weeks delta from the current day.
         '''
-
         due_assignments = []
 
         curr_date = datetime.datetime.now(datetime.timezone.utc)
@@ -178,9 +170,7 @@ def run():
     Gets upcoming assignments from a user's UCI Canvas using their
     token and prints it into the console.
     '''
-
-    # TOKEN is currently hardcoded at top of program.
-    canvas_api = CanvasApiAssignments(TOKEN)
+    canvas_api = CanvasApiAssignments(CANVAS_GRAPHQL_URL, CANVAS_TOKEN)
 
     assignments = canvas_api.get_all_assignments()
 
