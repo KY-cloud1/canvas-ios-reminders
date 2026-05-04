@@ -8,7 +8,7 @@ assignment data as a JSON API using Uvicorn.
 import fastapi
 import uvicorn
 
-from canvas_assignment_api import CanvasApi
+from canvas_client import CanvasApi
 from config import CANVAS_GRAPHQL_URL, CANVAS_TOKEN
 
 

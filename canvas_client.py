@@ -1,4 +1,4 @@
-# canvas_assignment_api.py
+# canvas_client.py
 
 """
 This module contains a class that gets upcoming assignments from
