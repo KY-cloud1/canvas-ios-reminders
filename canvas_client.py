@@ -102,63 +102,64 @@ class CanvasApi:
         except urllib.error.URLError as e:
             raise ConnectionError(f"Failed to connect to Canvas API: {e}")
 
-    def filter_assignments_due(self, assignments: dict, weeks_delta: int) -> list[dict]:
-        """
-        Filters Canvas assignments to include only those due within a
-        specified time range.
 
-        Args:
-            assignments: Raw assignment data returned from the Canvas API.
-            weeks_delta: Number of weeks into the future to include.
+def filter_assignments_due(assignments: dict, weeks_delta: int) -> list[dict]:
+    """
+    Filters Canvas assignments to include only those due within a
+    specified time range.
 
-        Returns:
-            A list of dictionaries containing filtered assignments with
-            course name, assignment name, and due date.
-        """
-        due_assignments = []
+    Args:
+        assignments: Raw assignment data returned from the Canvas API.
+        weeks_delta: Number of weeks into the future to include.
 
-        curr_date = datetime.datetime.now(datetime.timezone.utc)
+    Returns:
+        A list of dictionaries containing filtered assignments with
+        course name, assignment name, and due date.
+    """
+    due_assignments = []
 
-        weeks_future = curr_date + datetime.timedelta(weeks=weeks_delta)
+    curr_date = datetime.datetime.now(datetime.timezone.utc)
 
-        for course in assignments["data"]["allCourses"]:
-            course_code_split = course["courseCode"].split()
+    weeks_future = curr_date + datetime.timedelta(weeks=weeks_delta)
 
-            for assignment in course["assignmentsConnection"]["nodes"]:
-                assignment_due_date = assignment.get("dueAt")
+    for course in assignments["data"]["allCourses"]:
+        course_code_split = course["courseCode"].split()
 
-                if not assignment_due_date:
-                    continue
+        for assignment in course["assignmentsConnection"]["nodes"]:
+            assignment_due_date = assignment.get("dueAt")
 
-                # Convert assignment due date from ISO 8601 string into
-                # datetime.datetime object in UTC for comparison.
-                due_date_dt = datetime.datetime.fromisoformat(
-                    assignment_due_date.replace("Z", "+00:00")
+            if not assignment_due_date:
+                continue
+
+            # Convert assignment due date from ISO 8601 string into
+            # datetime.datetime object in UTC for comparison.
+            due_date_dt = datetime.datetime.fromisoformat(
+                assignment_due_date.replace("Z", "+00:00")
+            )
+
+            if due_date_dt >= curr_date and due_date_dt <= weeks_future:
+                # Use only the first two strings in the courseCode
+                # as the course's title if the courseCode is at
+                # least two strings long. Otherwise just use the
+                # entire courseCode.
+                #
+                # This should make the course title only the
+                # abbreviated course department and the course
+                # number (ex: MATH 1).
+                if len(course_code_split) >= 2:
+                    course_title = " ".join(course_code_split[:2])
+                else:
+                    course_title = course["courseCode"]
+
+                due_assignments.append(
+                    {
+                        "course": course_title,
+                        "assignment": assignment["name"],
+                        "dueAt": assignment_due_date,
+                    }
                 )
 
-                if due_date_dt >= curr_date and due_date_dt <= weeks_future:
-                    # Use only the first two strings in the courseCode
-                    # as the course's title if the courseCode is at
-                    # least two strings long. Otherwise just use the
-                    # entire courseCode.
-                    #
-                    # This should make the course title only the
-                    # abbreviated course department and the course
-                    # number (ex: MATH 1).
-                    if len(course_code_split) >= 2:
-                        course_title = " ".join(course_code_split[:2])
-                    else:
-                        course_title = course["courseCode"]
-
-                    due_assignments.append(
-                        {
-                            "course": course_title,
-                            "assignment": assignment["name"],
-                            "dueAt": assignment_due_date,
-                        }
-                    )
-
-        return due_assignments
+    return due_assignments
 
 
 def run():
@@ -170,7 +171,7 @@ def run():
 
     assignments = canvas_api.get_all_assignments()
 
-    sorted_assignments = canvas_api.filter_assignments_due(assignments, WEEKS_DELTA)
+    sorted_assignments = filter_assignments_due(assignments, WEEKS_DELTA)
 
     print(sorted_assignments)
 
