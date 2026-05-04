@@ -42,3 +42,7 @@ def get_env(name: str) -> str:
 # Retrieve user Canvas information located in .env file.
 CANVAS_GRAPHQL_URL = get_env("CANVAS_GRAPHQL_URL")
 CANVAS_TOKEN = get_env("CANVAS_TOKEN")
+
+# Retrieve user Gradescope information located in .env file.
+GRADESCOPE_EMAIL = get_env("GRADESCOPE_EMAIL")
+GRADESCOPE_PASSWORD = get_env("GRADESCOPE_PASSWORD")
