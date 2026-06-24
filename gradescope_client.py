@@ -9,7 +9,7 @@ import datetime
 import os
 
 from config import GRADESCOPE_EMAIL, GRADESCOPE_PASSWORD
-from playwright.sync_api import Playwright, sync_playwright
+from playwright.sync_api import sync_playwright
 
 
 # Absolute path to this python module's file directory.
@@ -54,46 +54,41 @@ class GradescopeAutomation:
         self._password = password
         self.headless = headless
 
-    def login(self, playwright: Playwright) -> None:
+    def login(self) -> None:
         """
         Logs into Gradescope using stored user credentials and saves
         the authenticated browser state for later reuse.
-
-        Args:
-            playwright: A Playwright instance used to control the browser.
 
         Raises:
             TimeoutError: If the login page fails to load or respond.
             PlaywrightError: If browser automation actions fail.
         """
-        # Launch Chrome and create a new context.
-        browser = playwright.chromium.launch(headless=self.headless)
-        context = browser.new_context()
-        page = context.new_page()
+        with sync_playwright() as playwright:
+            # Launch Chrome and create a new context.
+            browser = playwright.chromium.launch(headless=self.headless)
+            context = browser.new_context()
+            page = context.new_page()
 
-        # Go to Gradescope website.
-        page.goto("https://www.gradescope.com/")
+            # Go to Gradescope website.
+            page.goto("https://www.gradescope.com/")
 
-        # Login to Gradescope using user's credentials.
-        page.get_by_role("button", name="Log In").click()
-        page.fill("#session_email", self._email)
-        page.fill("#session_password", self._password)
-        page.get_by_role("button", name="Log In").click()
+            # Login to Gradescope using user's credentials.
+            page.get_by_role("button", name="Log In").click()
+            page.fill("#session_email", self._email)
+            page.fill("#session_password", self._password)
+            page.get_by_role("button", name="Log In").click()
 
-        # Save context state.
-        context.storage_state(path=FILE_PATH)
+            # Save context state.
+            context.storage_state(path=FILE_PATH)
 
-        # Close Chrome after timeout to allow time for login processing.
-        page.wait_for_load_state("networkidle")
-        browser.close()
+            # Close Chrome after timeout to allow time for login processing.
+            page.wait_for_load_state("networkidle")
+            browser.close()
 
-    def get_all_assignments(self, playwright: Playwright) -> list[dict]:
+    def get_all_assignments(self) -> list[dict]:
         """
         Scrapes upcoming Gradescope assignments from all enrolled courses
         using a saved authenticated browser session.
-
-        Args:
-            playwright: A Playwright instance used to control the browser.
 
         Returns:
             A list of dictionaries, each containing:
@@ -106,88 +101,89 @@ class GradescopeAutomation:
             PlaywrightError: If page navigation or element selection fails.
             ValueError: If expected assignment data cannot be parsed.
         """
-        # Launch Chrome using existing context from login.
-        browser = playwright.chromium.launch(headless=self.headless)
-        context = browser.new_context(storage_state=FILE_PATH)
-        page = context.new_page()
+        with sync_playwright() as playwright:
+            # Launch Chrome using existing context from login.
+            browser = playwright.chromium.launch(headless=self.headless)
+            context = browser.new_context(storage_state=FILE_PATH)
+            page = context.new_page()
 
-        # Load Gradescope course dashboard.
-        page.goto(COURSE_DASHBOARD_URL)
-        page.wait_for_load_state("networkidle")
-
-        # Get all courses found on dashboard.
-        courses = page.locator("a[href*='/courses/']")
-        course_data = []
-        for i in range(courses.count()):
-            course = courses.nth(i)
-
-            full_course_name = course.inner_text().strip()
-
-            # Use shortened course name if possible.
-            course_name_split = full_course_name.split()
-            if len(course_name_split) >= 2:
-                course_title = " ".join(course_name_split[:2])
-            else:
-                course_title = full_course_name
-
-            # Get the relative URL for the course page.
-            href = course.get_attribute("href")
-
-            # Store the course title and its corresponding link for
-            # later navigation.
-            if href:
-                course_data.append((course_title, href))
-
-        # Go through each course and fetch its assignments with
-        # due dates.
-        all_assignments = []
-        for course_name, href in course_data:
-            page.goto(COURSE_DASHBOARD_URL + href)
+            # Load Gradescope course dashboard.
+            page.goto(COURSE_DASHBOARD_URL)
             page.wait_for_load_state("networkidle")
 
-            # Locate all table rows in the assignments table body.
-            rows = page.locator("#assignments-student-table tbody tr")
+            # Get all courses found on dashboard.
+            courses = page.locator("a[href*='/courses/']")
+            course_data = []
+            for i in range(courses.count()):
+                course = courses.nth(i)
 
-            # Iterate through each assignment row in the table.
-            for i in range(rows.count()):
-                row = rows.nth(i)
+                full_course_name = course.inner_text().strip()
 
-                # Assignment title.
-                title = row.locator("th").inner_text().strip()
+                # Use shortened course name if possible.
+                course_name_split = full_course_name.split()
+                if len(course_name_split) >= 2:
+                    course_title = " ".join(course_name_split[:2])
+                else:
+                    course_title = full_course_name
 
-                # Due dates.
-                due_dates = row.locator("time.submissionTimeChart--dueDate")
+                # Get the relative URL for the course page.
+                href = course.get_attribute("href")
 
-                # Skip rows with no due date.
-                if due_dates.count() == 0:
-                    continue
+                # Store the course title and its corresponding link for
+                # later navigation.
+                if href:
+                    course_data.append((course_title, href))
 
-                # First due date is the actual due date.
-                due_date_str = due_dates.first.get_attribute("datetime")
+            # Go through each course and fetch its assignments with
+            # due dates.
+            all_assignments = []
+            for course_name, href in course_data:
+                page.goto(COURSE_DASHBOARD_URL + href)
+                page.wait_for_load_state("networkidle")
 
-                # Skip row if due date parsing fails.
-                if not due_date_str:
-                    continue
+                # Locate all table rows in the assignments table body.
+                rows = page.locator("#assignments-student-table tbody tr")
 
-                # Convert due_date_str to datetime object.
-                due_date_dt = datetime.datetime.strptime(
-                    due_date_str, "%Y-%m-%d %H:%M:%S %z"
-                )
+                # Iterate through each assignment row in the table.
+                for i in range(rows.count()):
+                    row = rows.nth(i)
 
-                # Convert datetime object to ISO 8601 for storage.
-                due_date_iso = due_date_dt.isoformat()
+                    # Assignment title.
+                    title = row.locator("th").inner_text().strip()
 
-                all_assignments.append(
-                    {
-                        "course": course_name,
-                        "assignment": title,
-                        "dueAt": due_date_iso,
-                    }
-                )
+                    # Due dates.
+                    due_dates = row.locator("time.submissionTimeChart--dueDate")
 
-        browser.close()
+                    # Skip rows with no due date.
+                    if due_dates.count() == 0:
+                        continue
 
-        return all_assignments
+                    # First due date is the actual due date.
+                    due_date_str = due_dates.first.get_attribute("datetime")
+
+                    # Skip row if due date parsing fails.
+                    if not due_date_str:
+                        continue
+
+                    # Convert due_date_str to datetime object.
+                    due_date_dt = datetime.datetime.strptime(
+                        due_date_str, "%Y-%m-%d %H:%M:%S %z"
+                    )
+
+                    # Convert datetime object to ISO 8601 for storage.
+                    due_date_iso = due_date_dt.isoformat()
+
+                    all_assignments.append(
+                        {
+                            "course": course_name,
+                            "assignment": title,
+                            "dueAt": due_date_iso,
+                        }
+                    )
+
+            browser.close()
+
+            return all_assignments
 
 
 def filter_gradescope_assignments(
@@ -237,15 +233,12 @@ def run():
     Retrieves upcoming assignments, filters them, and prints due
     assignments to the console.
     """
-    with sync_playwright() as playwright:
-        client = GradescopeAutomation(GRADESCOPE_EMAIL, GRADESCOPE_PASSWORD, False)
-        client.login(playwright)
-        all_assignments = client.get_all_assignments(playwright)
-        filtered_assignments = filter_gradescope_assignments(
-            all_assignments, WEEKS_DELTA
-        )
-        
-        print(filtered_assignments)
+    client = GradescopeAutomation(GRADESCOPE_EMAIL, GRADESCOPE_PASSWORD, False)
+    client.login()
+    all_assignments = client.get_all_assignments()
+    filtered_assignments = filter_gradescope_assignments(all_assignments, WEEKS_DELTA)
+
+    print(filtered_assignments)
 
 
 if __name__ == "__main__":
