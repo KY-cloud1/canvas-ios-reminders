@@ -103,7 +103,7 @@ class CanvasApi:
             raise ConnectionError(f"Failed to connect to Canvas API: {e}")
 
 
-def filter_assignments_due(assignments: dict, weeks_delta: int) -> list[dict]:
+def filter_canvas_assignments(assignments: dict, weeks_delta: int) -> list[dict]:
     """
     Filters Canvas assignments to include only those due within a
     specified time range.
@@ -116,11 +116,11 @@ def filter_assignments_due(assignments: dict, weeks_delta: int) -> list[dict]:
         A list of dictionaries containing filtered assignments with
         course name, assignment name, and due date.
     """
-    due_assignments = []
-
+    # Load the current date and future weeks.
     curr_date = datetime.datetime.now(datetime.timezone.utc)
-
     weeks_future = curr_date + datetime.timedelta(weeks=weeks_delta)
+
+    due_assignments = []
 
     for course in assignments["data"]["allCourses"]:
         course_code_split = course["courseCode"].split()
@@ -137,7 +137,10 @@ def filter_assignments_due(assignments: dict, weeks_delta: int) -> list[dict]:
                 assignment_due_date.replace("Z", "+00:00")
             )
 
-            if due_date_dt >= curr_date and due_date_dt <= weeks_future:
+            # Only include assignment if its due date is not before the
+            # current date and its due date is within the amount of
+            # weeks forward specified by weeks_delta.
+            if curr_date <= due_date_dt <= weeks_future:
                 # Use only the first two strings in the courseCode
                 # as the course's title if the courseCode is at
                 # least two strings long. Otherwise just use the
@@ -165,13 +168,13 @@ def filter_assignments_due(assignments: dict, weeks_delta: int) -> list[dict]:
 def run():
     """
     Entry point for testing the Canvas API integration locally.
-    Retrieves upcoming assignments and prints them to the console.
+
+    Retrieves upcoming assignments, filters thems, and prints due
+    assignments to the console.
     """
     canvas_api = CanvasApi(CANVAS_GRAPHQL_URL, CANVAS_TOKEN)
-
     assignments = canvas_api.get_all_assignments()
-
-    sorted_assignments = filter_assignments_due(assignments, WEEKS_DELTA)
+    sorted_assignments = filter_canvas_assignments(assignments, WEEKS_DELTA)
 
     print(sorted_assignments)
 
