@@ -34,7 +34,8 @@ class CanvasApi:
             token: A valid Canvas access token for authentication.
 
         Raises:
-            ValueError: If either the URL or token is missing or invalid.
+            ValueError: If either the URL or token is missing
+                or invalid.
         """
         # Ensure given url and token are not None.
         if not url or not token:
@@ -49,12 +50,14 @@ class CanvasApi:
         the GraphQL API.
 
         Returns:
-            A dictionary containing the raw API response with courses and
-            their associated assignments.
+            list[dict]: A dictionary containing the raw API response
+                with courses and their associated assignments.
 
         Raises:
-            ValueError: If the response is empty or contains invalid JSON.
-            ConnectionError: If the API request fails or cannot connect.
+            ValueError: If the response is empty or contains
+                invalid JSON.
+            ConnectionError: If the API request fails or
+                cannot connect.
         """
         # Canvas GraphQL query for course code and assignments with
         # due dates.
@@ -113,8 +116,9 @@ def filter_canvas_assignments(assignments: dict, weeks_delta: int) -> list[dict]
         weeks_delta: Number of weeks into the future to include.
 
     Returns:
-        A list of dictionaries containing filtered assignments with
-        course name, assignment name, and due date.
+        list[dict]: A list of dictionaries containing filtered
+            assignments with course name, assignment name, and
+            due date.
     """
     # Load the current date and future weeks.
     curr_date = datetime.datetime.now(datetime.timezone.utc)

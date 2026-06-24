@@ -34,14 +34,15 @@ class GradescopeAutomation:
 
     def __init__(self, email: str, password: str, headless: bool = True) -> None:
         """
-        Initializes a GradescopeAutomation instance with user credentials
-        and browser configuration for Playwright automation.
+        Initializes a GradescopeAutomation instance with user
+        credentials and browser configuration for Playwright
+        automation.
 
         Args:
             email: The Gradescope login email address.
             password: The Gradescope login password.
-            headless: Whether to run the browser in headless mode. Defaults
-                to True.
+            headless: Whether to run the browser in headless mode.
+                Defaults to True.
 
         Raises:
             ValueError: If email or password is missing or invalid.
@@ -91,14 +92,14 @@ class GradescopeAutomation:
         using a saved authenticated browser session.
 
         Returns:
-            A list of dictionaries, each containing:
-                - course: The abbreviated course title
-                - assignment: The assignment name
-                - dueAt: The assignment due date as a string
+            list[dict]: A list of dictionaries that each contain a
+                course title, assignment name, and assignment due date.
 
         Raises:
-            FileNotFoundError: If the saved authentication state file is missing.
-            PlaywrightError: If page navigation or element selection fails.
+            FileNotFoundError: If the saved authentication state file
+                is missing.
+            PlaywrightError: If page navigation or element selection
+                fails.
             ValueError: If expected assignment data cannot be parsed.
         """
         with sync_playwright() as playwright:
@@ -194,12 +195,14 @@ def filter_gradescope_assignments(
     the next `weeks_delta` weeks.
 
     Args:
-        assignments: List of assignment dictionaries from GradescopeAutomation.
+        assignments: List of assignment dictionaries from
+            GradescopeAutomation.
         weeks_delta: Number of weeks into the future to include.
 
     Returns:
-        A list of dictionaries containing filtered assignments with
-        a course name, assignment name, and due date.
+        list[dict]: A list of dictionaries containing filtered
+            assignments with a course name, assignment name, and
+            due date.
     """
     # Load the current date and future weeks.
     curr_date = datetime.datetime.now(datetime.timezone.utc)
