@@ -6,6 +6,7 @@ as a JSON API using Uvicorn.
 """
 
 import fastapi
+import ngrok
 import uvicorn
 
 from canvas_client import CanvasApi, filter_canvas_assignments
@@ -14,6 +15,8 @@ from config import (
     CANVAS_TOKEN,
     GRADESCOPE_EMAIL,
     GRADESCOPE_PASSWORD,
+    NGROK_DOMAIN,
+    NGROK_AUTHTOKEN,
 )
 from gradescope_client import GradescopeAutomation, filter_gradescope_assignments
 
@@ -40,7 +43,7 @@ def get_upcoming_assignments() -> list[dict]:
     dates, and returns it as JSON.
 
     Returns:
-        list[dict]: A list of dictionaries representing upcoming 
+        list[dict]: A list of dictionaries representing upcoming
             assignments.
     """
     due_assignments = []
@@ -71,8 +74,11 @@ def get_upcoming_assignments() -> list[dict]:
 
 
 if __name__ == "__main__":
+    if NGROK_DOMAIN and NGROK_AUTHTOKEN:
+        listener = ngrok.forward(PORT, authtoken=NGROK_AUTHTOKEN, domain=NGROK_DOMAIN)
+
     uvicorn.run(
-        "server:app",
+        app,
         port=PORT,
         log_level="info",
     )
