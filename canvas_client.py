@@ -173,7 +173,7 @@ def run():
     """
     Entry point for testing the Canvas API integration locally.
 
-    Retrieves upcoming assignments, filters thems, and prints due
+    Retrieves upcoming assignments, filters them, and prints due
     assignments to the console.
     """
     canvas_api = CanvasApi(CANVAS_GRAPHQL_URL, CANVAS_TOKEN)
