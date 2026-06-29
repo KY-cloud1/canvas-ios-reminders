@@ -22,8 +22,7 @@ from gradescope_client import GradescopeAutomation, filter_gradescope_assignment
 
 
 # This constant represents the port that the local server will run on.
-PORT = 8080
-
+PORT = 8081
 
 # This constant represents the number of weeks in the future to
 # consider for assignments with due dates.
@@ -63,12 +62,16 @@ def get_upcoming_assignments() -> list[dict]:
         gradescope_automation = GradescopeAutomation(
             GRADESCOPE_EMAIL, GRADESCOPE_PASSWORD
         )
-        gradescope_assignments = gradescope_automation.get_all_assignments()
-        filtered_gradescope_assignments = filter_gradescope_assignments(
-            gradescope_assignments, WEEKS_DELTA
-        )
 
-        due_assignments.extend(filtered_gradescope_assignments)
+        try:
+            gradescope_assignments = gradescope_automation.get_all_assignments()
+            filtered_gradescope_assignments = filter_gradescope_assignments(
+                gradescope_assignments, WEEKS_DELTA
+            )
+
+            due_assignments.extend(filtered_gradescope_assignments)
+        finally:
+            gradescope_automation.close_browser()
 
     return due_assignments
 
