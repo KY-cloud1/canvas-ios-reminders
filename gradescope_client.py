@@ -25,8 +25,8 @@ COURSE_DASHBOARD_URL = "https://www.gradescope.com/"
 # consider for assignments with due dates.
 WEEKS_DELTA = 2
 
-
-LOGIN_TIMEOUT_MS = 10_000
+# Amount of time to wait during login validation.
+LOGIN_TIMEOUT_MS = 5_000
 
 
 class GradescopeAutomation:
@@ -120,6 +120,9 @@ class GradescopeAutomation:
                 fails.
             ValueError: If expected assignment data cannot be parsed.
         """
+        # Ensure authentication before scraping.
+        self._ensure_logged_in()
+
         with sync_playwright() as playwright:
             # Launch Chrome using existing context from login.
             browser = playwright.chromium.launch(headless=self.headless)
@@ -203,6 +206,67 @@ class GradescopeAutomation:
             browser.close()
 
             return all_assignments
+
+    def _ensure_logged_in(self) -> None:
+        """
+        Ensure a valid authenticated Gradescope session exists.
+
+        Attempts to use a saved Playwright authentication state to
+        verify that the course dashboard is accessible. If
+        verification fails, performs a fresh login and
+        re-verifies authentication.
+
+        Raises:
+            RuntimeError: If authentication cannot be established even
+                after re-login.
+            PlaywrightTimeoutError: If page navigation or element
+                detection times out during verification.
+        """
+        # Try using existing auth.json from login().
+        if os.path.exists(FILE_PATH):
+            with sync_playwright() as playwright:
+                # Launch Chrome using existing context from login.
+                browser = playwright.chromium.launch(headless=self.headless)
+                context = browser.new_context(storage_state=FILE_PATH)
+                page = context.new_page()
+
+                # Load Gradescope course dashboard.
+                page.goto(COURSE_DASHBOARD_URL)
+                page.wait_for_load_state("networkidle")
+
+                try:
+                    page.locator("a[href*='/courses/']").first.wait_for(
+                        timeout=LOGIN_TIMEOUT_MS
+                    )
+                    browser.close()
+                    return  # Already logged in
+                except PlaywrightTimeoutError:
+                    browser.close()
+
+        # Try new login.
+        self.login()
+
+        # Verify second login.
+        with sync_playwright() as playwright:
+            # Launch Chrome using existing context from login.
+            browser = playwright.chromium.launch(headless=self.headless)
+            context = browser.new_context(storage_state=FILE_PATH)
+            page = context.new_page()
+
+            # Load Gradescope course dashboard.
+            page.goto(COURSE_DASHBOARD_URL)
+            page.wait_for_load_state("networkidle")
+
+            try:
+                page.locator("a[href*='/courses/']").first.wait_for(
+                    timeout=LOGIN_TIMEOUT_MS
+                )
+                browser.close()
+            except PlaywrightTimeoutError as e:
+                browser.close()
+                raise RuntimeError(
+                    "Gradescope login failed even after re-authentication"
+                ) from e
 
 
 def filter_gradescope_assignments(
