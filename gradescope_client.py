@@ -9,7 +9,7 @@ import datetime
 import os
 
 from config import GRADESCOPE_EMAIL, GRADESCOPE_PASSWORD
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import TimeoutError as PlaywrightTimeoutError, sync_playwright
 
 
 # Absolute path to this python module's file directory.
@@ -24,6 +24,9 @@ COURSE_DASHBOARD_URL = "https://www.gradescope.com/"
 # This constant represents the number of weeks in the future to
 # consider for assignments with due dates.
 WEEKS_DELTA = 2
+
+
+LOGIN_TIMEOUT_MS = 10_000
 
 
 class GradescopeAutomation:
@@ -57,11 +60,13 @@ class GradescopeAutomation:
 
     def login(self) -> None:
         """
-        Logs into Gradescope using stored user credentials and saves
-        the authenticated browser state for later reuse.
+        Logs into Gradescope using stored user credentials, verifies
+        that the course dashboard is reached, and saves the
+        authenticated browser state for later reuse.
 
         Raises:
-            TimeoutError: If the login page fails to load or respond.
+            RuntimeError: If authentication fails or the course
+                dashboard cannot be reached after login.
             PlaywrightError: If browser automation actions fail.
         """
         with sync_playwright() as playwright:
@@ -79,10 +84,23 @@ class GradescopeAutomation:
             page.fill("#session_password", self._password)
             page.get_by_role("button", name="Log In").click()
 
+            # Verify Gradescope reached the course dashboard
+            # after login.
+            try:
+                page.locator("a[href*='/courses/']").first.wait_for(
+                    timeout=LOGIN_TIMEOUT_MS
+                )
+            except PlaywrightTimeoutError as e:
+                browser.close()
+                raise RuntimeError(
+                    "Gradescope login failed: course dashboard not reached."
+                ) from e
+
             # Save context state.
             context.storage_state(path=FILE_PATH)
 
-            # Close Chrome after timeout to allow time for login processing.
+            # Close Chrome after timeout to allow time for
+            # login processing.
             page.wait_for_load_state("networkidle")
             browser.close()
 
