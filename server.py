@@ -5,6 +5,9 @@ This module defines a FastAPI web server that exposes assignment data
 as a JSON API using Uvicorn.
 """
 
+import asyncio
+from contextlib import asynccontextmanager
+
 import fastapi
 import ngrok
 import uvicorn
@@ -21,25 +24,60 @@ from config import (
 from gradescope_client import GradescopeAutomation, filter_gradescope_assignments
 
 
-# This constant represents the port that the local server will run on.
+# The port that the local server will run on.
 PORT = 8081
 
-# This constant represents the number of weeks in the future to
-# consider for assignments with due dates.
+# The number of weeks in the future to consider for assignments with
+# due dates.
 WEEKS_DELTA = 2
 
+# The amount of time in between fetching refreshes.
+REFRESH_INTERVAL_SECONDS = 3600
 
-app = fastapi.FastAPI()
 
-
-@app.get("/assignments")
-def get_upcoming_assignments() -> list[dict]:
+@asynccontextmanager
+async def lifespan(app: fastapi.FastAPI):
     """
-    API endpoint that retrieves upcoming assignments from Canvas
-    (required) and Gradescope (optional).
+    Manages the application's startup and shutdown lifecycle.
 
-    The function fetches assignment data, filters it based on due
-    dates, and returns it as JSON.
+    On startup, the function populates the assignment cache and starts
+    a background task that refreshes it periodically. On shutdown, the
+    background task is cancelled and awaited before the application
+    exits.
+
+    Args:
+        app: The FastAPI application instance.
+    """
+    # Startup logic
+    print("Application is starting...")
+
+    app.state.cached_assignments = fetch_assignments()
+    task = asyncio.create_task(refresh_assignments())
+
+    yield
+
+    # Shutdown logic
+    print("Application is shutting down...")
+
+    task.cancel()
+
+    try:
+        await task
+    except asyncio.CancelledError:
+        pass
+
+
+app = fastapi.FastAPI(lifespan=lifespan)
+app.state.cached_assignments = []
+
+
+def fetch_assignments() -> list[dict]:
+    """
+    Fetches upcoming assignments from supported learning platforms.
+
+    The function retrieves assignments from Canvas and, if configured,
+    Gradescope. It filters assignments by due date and returns a single
+    combined list.
 
     Returns:
         list[dict]: A list of dictionaries representing upcoming
@@ -74,6 +112,35 @@ def get_upcoming_assignments() -> list[dict]:
             gradescope_automation.close_browser()
 
     return due_assignments
+
+
+async def refresh_assignments() -> None:
+    """
+    Refreshes the cached assignment data at regular intervals.
+
+    The function runs continuously while the application is running,
+    updating the cached assignments after each refresh interval. If a
+    refresh fails, the error is logged and the task continues running.
+    """
+    while True:
+        await asyncio.sleep(REFRESH_INTERVAL_SECONDS)
+
+        try:
+            app.state.cached_assignments = fetch_assignments()
+        except Exception as exc:
+            print(f"Refresh failed: {exc}")
+
+
+@app.get("/assignments")
+def get_upcoming_assignments() -> list[dict]:
+    """
+    Returns the cached list of upcoming assignments.
+
+    Returns:
+        list[dict]: A list of dictionaries representing upcoming
+            assignments.
+    """
+    return app.state.cached_assignments
 
 
 if __name__ == "__main__":
