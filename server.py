@@ -49,17 +49,22 @@ async def lifespan(app: fastapi.FastAPI):
         app: The FastAPI application instance.
     """
     # Startup logic
-    print("Application is starting...")
-
     app.state.cached_assignments = fetch_assignments()
     task = asyncio.create_task(refresh_assignments())
 
+    if NGROK_DOMAIN and NGROK_AUTHTOKEN:
+        listener = ngrok.forward(PORT, authtoken=NGROK_AUTHTOKEN, domain=NGROK_DOMAIN)
+    else:
+        listener = None
+
+    # Server is live
     yield
 
     # Shutdown logic
-    print("Application is shutting down...")
-
     task.cancel()
+
+    if listener:
+        ngrok.kill()
 
     try:
         await task
@@ -144,9 +149,6 @@ def get_upcoming_assignments() -> list[dict]:
 
 
 if __name__ == "__main__":
-    if NGROK_DOMAIN and NGROK_AUTHTOKEN:
-        listener = ngrok.forward(PORT, authtoken=NGROK_AUTHTOKEN, domain=NGROK_DOMAIN)
-
     uvicorn.run(
         app,
         port=PORT,
