@@ -49,7 +49,7 @@ async def lifespan(app: fastapi.FastAPI):
         app: The FastAPI application instance.
     """
     # Startup logic
-    app.state.cached_assignments = fetch_assignments()
+    app.state.cached_assignments = await asyncio.to_thread(fetch_assignments)
     task = asyncio.create_task(refresh_assignments())
 
     if NGROK_DOMAIN and NGROK_AUTHTOKEN:
@@ -131,7 +131,7 @@ async def refresh_assignments() -> None:
         await asyncio.sleep(REFRESH_INTERVAL_SECONDS)
 
         try:
-            app.state.cached_assignments = fetch_assignments()
+            app.state.cached_assignments = await asyncio.to_thread(fetch_assignments)
         except Exception as exc:
             print(f"Refresh failed: {exc}")
 
