@@ -8,7 +8,7 @@ as a JSON API using Uvicorn.
 import asyncio
 from contextlib import asynccontextmanager
 
-import fastapi
+from fastapi import APIRouter, FastAPI
 import ngrok
 import uvicorn
 
@@ -36,7 +36,7 @@ REFRESH_INTERVAL_SECONDS = 3600
 
 
 @asynccontextmanager
-async def lifespan(app: fastapi.FastAPI):
+async def lifespan(app: FastAPI):
     """
     Manages the application's startup and shutdown lifecycle.
 
@@ -72,7 +72,9 @@ async def lifespan(app: fastapi.FastAPI):
         pass
 
 
-app = fastapi.FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan)
+api = APIRouter(prefix="/api")
+
 app.state.cached_assignments = []
 
 
@@ -136,7 +138,7 @@ async def refresh_assignments() -> None:
             print(f"Refresh failed: {exc}")
 
 
-@app.get("/assignments")
+@api.get("/assignments")
 def get_upcoming_assignments() -> list[dict]:
     """
     Returns the cached list of upcoming assignments.
@@ -146,6 +148,9 @@ def get_upcoming_assignments() -> list[dict]:
             assignments.
     """
     return app.state.cached_assignments
+
+
+app.include_router(api)
 
 
 if __name__ == "__main__":
