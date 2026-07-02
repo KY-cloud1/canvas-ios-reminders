@@ -9,7 +9,7 @@ import asyncio
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 
-from fastapi import APIRouter, FastAPI
+from fastapi import APIRouter, FastAPI, BackgroundTasks
 import ngrok
 import uvicorn
 
@@ -162,7 +162,7 @@ async def refresh_assignments() -> None:
 
 
 @api.get("/status")
-def get_status() -> dict:
+def get_status() -> dict[str, object]:
     """
     Returns the current health status of the server.
 
@@ -189,6 +189,24 @@ def get_upcoming_assignments() -> list[dict]:
             assignments.
     """
     return app.state.cached_assignments
+
+
+@api.post("/refresh")
+def manual_refresh(background_tasks: BackgroundTasks) -> dict[str, str]:
+    """
+    Trigger a background refresh of cached assignment data.
+
+    Args:
+        background_tasks (BackgroundTasks): FastAPI background task
+            manager.
+
+    Returns:
+        dict[str, str]: Status message indicating the refresh has been
+            scheduled.
+    """
+    background_tasks.add_task(refresh_once)
+
+    return {"status": "refresh_started"}
 
 
 app.include_router(api)
