@@ -41,18 +41,16 @@ async def lifespan(app: FastAPI):
     """
     Manages the application's startup and shutdown lifecycle.
 
-    On startup, the function populates the assignment cache and starts
-    a background task that refreshes it periodically. On shutdown, the
-    background task is cancelled and awaited before the application
-    exits.
+    On startup, the function performs an initial assignment refresh,
+    populating the cache before starting a background task that
+    refreshes it periodically. On shutdown, the background task is
+    cancelled and awaited before the application exits.
 
     Args:
         app: The FastAPI application instance.
     """
     # Startup logic
-    app.state.cached_assignments = await asyncio.to_thread(fetch_assignments)
-    app.state.last_refresh = datetime.now(UTC)
-
+    await refresh_once()  # Fill cache once before continuing startup.
     task = asyncio.create_task(refresh_assignments())
 
     if NGROK_DOMAIN and NGROK_AUTHTOKEN:
@@ -126,24 +124,41 @@ def fetch_assignments() -> list[dict]:
     return due_assignments
 
 
+async def refresh_once() -> None:
+    """
+    Performs a single refresh of the cached assignment data.
+
+    The function fetches the latest assignments from configured sources
+    and updates the application cache. On success, it records the
+    refresh timestamp and clears any previous refresh error. On
+    failure, it records the error and re-raises the exception.
+    """
+    try:
+        app.state.cached_assignments = await asyncio.to_thread(fetch_assignments)
+        app.state.last_refresh = datetime.now(UTC)
+        app.state.last_refresh_error = None
+    except Exception as exc:
+        app.state.last_refresh_error = str(exc)
+        raise
+
+
 async def refresh_assignments() -> None:
     """
-    Refreshes the cached assignment data at regular intervals.
+    Continuously refreshes the cached assignment data at a fixed
+    interval.
 
-    The function runs continuously while the application is running,
-    updating the cached assignments after each refresh interval. If a
-    refresh fails, the error is logged and the task continues running.
+    The function runs indefinitely while the application is active,
+    repeatedly calling `refresh_once()` and waiting for the configured
+    interval between refreshes. Any refresh failures are logged, and
+    the loop continues after the sleep interval.
     """
     while True:
-        await asyncio.sleep(REFRESH_INTERVAL_SECONDS)
-
         try:
-            app.state.cached_assignments = await asyncio.to_thread(fetch_assignments)
-            app.state.last_refresh = datetime.now(UTC)
-            app.state.last_refresh_error = None
+            await refresh_once()
         except Exception as exc:
-            app.state.last_refresh_error = str(exc)
             print(f"Refresh failed: {exc}")
+
+        await asyncio.sleep(REFRESH_INTERVAL_SECONDS)
 
 
 @api.get("/status")
