@@ -7,6 +7,7 @@ as a JSON API using Uvicorn.
 
 import asyncio
 from contextlib import asynccontextmanager
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, FastAPI
 import ngrok
@@ -50,6 +51,8 @@ async def lifespan(app: FastAPI):
     """
     # Startup logic
     app.state.cached_assignments = await asyncio.to_thread(fetch_assignments)
+    app.state.last_refresh = datetime.now(UTC)
+
     task = asyncio.create_task(refresh_assignments())
 
     if NGROK_DOMAIN and NGROK_AUTHTOKEN:
@@ -76,6 +79,8 @@ app = FastAPI(lifespan=lifespan)
 api = APIRouter(prefix="/api")
 
 app.state.cached_assignments = []
+app.state.last_refresh = None
+app.state.last_refresh_error = None
 
 
 def fetch_assignments() -> list[dict]:
@@ -134,8 +139,29 @@ async def refresh_assignments() -> None:
 
         try:
             app.state.cached_assignments = await asyncio.to_thread(fetch_assignments)
+            app.state.last_refresh = datetime.now(UTC)
+            app.state.last_refresh_error = None
         except Exception as exc:
+            app.state.last_refresh_error = str(exc)
             print(f"Refresh failed: {exc}")
+
+
+@api.get("/status")
+def get_status() -> dict:
+    """
+    Returns the current health status of the server.
+
+    Returns:
+        dict: Information about the assignment cache and its last
+            refresh.
+    """
+    return {
+        "status": "healthy" if app.state.last_refresh_error is None else "degraded",
+        "refresh_interval": REFRESH_INTERVAL_SECONDS,
+        "cached_assignments": len(app.state.cached_assignments),
+        "last_refresh": app.state.last_refresh,
+        "last_refresh_error": app.state.last_refresh_error,
+    }
 
 
 @api.get("/assignments")
