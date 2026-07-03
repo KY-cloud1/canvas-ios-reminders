@@ -9,9 +9,9 @@ import asyncio
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 
-from fastapi import APIRouter, FastAPI, BackgroundTasks
 import ngrok
 import uvicorn
+from fastapi import APIRouter, BackgroundTasks, FastAPI
 
 from canvas_client import CanvasApi, filter_canvas_assignments
 from config import (
@@ -19,8 +19,8 @@ from config import (
     CANVAS_TOKEN,
     GRADESCOPE_EMAIL,
     GRADESCOPE_PASSWORD,
-    NGROK_DOMAIN,
     NGROK_AUTHTOKEN,
+    NGROK_DOMAIN,
 )
 from gradescope_client import GradescopeAutomation, filter_gradescope_assignments
 
@@ -83,11 +83,11 @@ app.state.last_refresh_error = None
 
 def fetch_assignments() -> list[dict]:
     """
-    Fetches upcoming assignments from supported learning platforms.
+    Fetches upcoming assignments from configured learning platforms.
 
-    The function retrieves assignments from Canvas and, if configured,
-    Gradescope. It filters assignments by due date and returns a single
-    combined list.
+    The function retrieves assignments from Canvas and Gradescope if
+    they are configured. It filters assignments by due date and returns
+    a single combined list.
 
     Returns:
         list[dict]: A list of dictionaries representing upcoming
@@ -95,17 +95,17 @@ def fetch_assignments() -> list[dict]:
     """
     due_assignments = []
 
-    # Handle assignments from Canvas LMS.
-    canvas_api = CanvasApi(CANVAS_GRAPHQL_URL, CANVAS_TOKEN)
-    canvas_assignments = canvas_api.get_all_assignments()
-    filtered_canvas_assignments = filter_canvas_assignments(
-        canvas_assignments, WEEKS_DELTA
-    )
+    # Handle assignments from Canvas if configured.
+    if CANVAS_GRAPHQL_URL and CANVAS_TOKEN:
+        canvas_api = CanvasApi(CANVAS_GRAPHQL_URL, CANVAS_TOKEN)
+        canvas_assignments = canvas_api.get_all_assignments()
+        filtered_canvas_assignments = filter_canvas_assignments(
+            canvas_assignments, WEEKS_DELTA
+        )
 
-    due_assignments.extend(filtered_canvas_assignments)
+        due_assignments.extend(filtered_canvas_assignments)
 
-    # Handle assignments from Gradescope if login information is
-    # provided, otherwise skip Gradescope fetching.
+    # Handle assignments from Gradescope if configured.
     if GRADESCOPE_EMAIL and GRADESCOPE_PASSWORD:
         gradescope_automation = GradescopeAutomation(
             GRADESCOPE_EMAIL, GRADESCOPE_PASSWORD
