@@ -15,12 +15,15 @@ from fastapi import APIRouter, BackgroundTasks, FastAPI
 
 from canvas_client import CanvasApi, filter_canvas_assignments
 from config import (
+    CANVAS_ENABLED,
     CANVAS_GRAPHQL_URL,
     CANVAS_TOKEN,
     GRADESCOPE_EMAIL,
+    GRADESCOPE_ENABLED,
     GRADESCOPE_PASSWORD,
     NGROK_AUTHTOKEN,
     NGROK_DOMAIN,
+    NGROK_ENABLED,
 )
 from gradescope_client import GradescopeAutomation, filter_gradescope_assignments
 
@@ -53,7 +56,7 @@ async def lifespan(app: FastAPI):
     await refresh_once()  # Fill cache once before continuing startup.
     task = asyncio.create_task(refresh_assignments())
 
-    if NGROK_DOMAIN and NGROK_AUTHTOKEN:
+    if NGROK_ENABLED:
         listener = ngrok.forward(PORT, authtoken=NGROK_AUTHTOKEN, domain=NGROK_DOMAIN)
     else:
         listener = None
@@ -96,7 +99,7 @@ def fetch_assignments() -> list[dict]:
     due_assignments = []
 
     # Handle assignments from Canvas if configured.
-    if CANVAS_GRAPHQL_URL and CANVAS_TOKEN:
+    if CANVAS_ENABLED:
         canvas_api = CanvasApi(CANVAS_GRAPHQL_URL, CANVAS_TOKEN)
         canvas_assignments = canvas_api.get_all_assignments()
         filtered_canvas_assignments = filter_canvas_assignments(
@@ -106,7 +109,7 @@ def fetch_assignments() -> list[dict]:
         due_assignments.extend(filtered_canvas_assignments)
 
     # Handle assignments from Gradescope if configured.
-    if GRADESCOPE_EMAIL and GRADESCOPE_PASSWORD:
+    if GRADESCOPE_ENABLED:
         gradescope_automation = GradescopeAutomation(
             GRADESCOPE_EMAIL, GRADESCOPE_PASSWORD
         )
