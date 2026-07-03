@@ -42,19 +42,25 @@ def get_env(name: str) -> str:
 # Retrieve required Canvas information from .env file.
 CANVAS_GRAPHQL_URL = get_env("CANVAS_GRAPHQL_URL")
 CANVAS_TOKEN = get_env("CANVAS_TOKEN")
+CANVAS_ENABLED = True
 
 # Retrieve optional Gradescope information from .env file.
 try:
     GRADESCOPE_EMAIL = get_env("GRADESCOPE_EMAIL")
     GRADESCOPE_PASSWORD = get_env("GRADESCOPE_PASSWORD")
+    GRADESCOPE_ENABLED = True
 except ValueError:
     GRADESCOPE_EMAIL = None
     GRADESCOPE_PASSWORD = None
+    GRADESCOPE_ENABLED = False
+
 
 # Retrieve optional ngrok information from .env file.
 try:
     NGROK_DOMAIN = get_env("NGROK_DOMAIN")
     NGROK_AUTHTOKEN = get_env("NGROK_AUTHTOKEN")
+    NGROK_ENABLED = True
 except ValueError:
     NGROK_DOMAIN = None
     NGROK_AUTHTOKEN = None
+    NGROK_ENABLED = False
