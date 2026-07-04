@@ -13,5 +13,5 @@ gradescope = [
 ]
 
 ngrok = [
-    "pyngrok>=7.0.0"
+    "ngrok>=1.7.0"
 ]
