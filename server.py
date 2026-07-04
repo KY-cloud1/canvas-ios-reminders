@@ -242,9 +242,16 @@ def manual_refresh(background_tasks: BackgroundTasks) -> dict[str, str]:
 app.include_router(api)
 
 
-if __name__ == "__main__":
+def run() -> None:
+    """
+    Starts the FastAPI server using Uvicorn.
+    """
     uvicorn.run(
         app,
         port=PORT,
         log_level="info",
     )
+
+
+if __name__ == "__main__":
+    run()
