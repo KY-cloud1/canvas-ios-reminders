@@ -1,0 +1,17 @@
+[project]
+name = "your-project"
+version = "0.1.0"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "python-dotenv",
+]
+
+[project.optional-dependencies]
+gradescope = [
+    "playwright>=1.40.0"
+]
+
+ngrok = [
+    "pyngrok>=7.0.0"
+]

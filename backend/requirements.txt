@@ -1,7 +1,0 @@
-# Required third-party libraries for server.py.
-fastapi
-uvicorn
-python-dotenv
-
-# Required third-party libraries for gradescope_automation.py.
-playwright
