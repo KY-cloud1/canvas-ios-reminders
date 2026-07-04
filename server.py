@@ -182,6 +182,33 @@ def get_status() -> dict[str, object]:
     }
 
 
+@api.get("/config")
+def get_config() -> dict[str, object]:
+    """
+    Returns the server's current runtime configuration.
+
+    Returns:
+        dict: Non-sensitive configuration values and the
+            enabled/configured status of supported integrations.
+    """
+    return {
+        "canvas": {
+            "enabled": CANVAS_ENABLED,
+            "configured": bool(CANVAS_GRAPHQL_URL and CANVAS_TOKEN),
+        },
+        "gradescope": {
+            "enabled": GRADESCOPE_ENABLED,
+            "configured": bool(GRADESCOPE_EMAIL and GRADESCOPE_PASSWORD),
+        },
+        "refresh_interval": REFRESH_INTERVAL_SECONDS,
+        "weeks_delta": WEEKS_DELTA,
+        "ngrok": {
+            "enabled": NGROK_ENABLED,
+            "configured": bool(NGROK_DOMAIN and NGROK_AUTHTOKEN),
+        },
+    }
+
+
 @api.get("/assignments")
 def get_upcoming_assignments() -> list[dict]:
     """
