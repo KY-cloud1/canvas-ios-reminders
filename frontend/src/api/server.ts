@@ -1,6 +1,15 @@
+import type { ServerConfig, ServerStatus } from "../types/server";
+
 const API = "/api";
 
-export async function getStatus() {
+/**
+ * Retrieves the current status of the server.
+ *
+ * @returns A promise that resolves to the current server status information.
+ *
+ * @throws {Error} If the API request fails or returns a non-success response.
+ */
+export async function getStatus(): Promise<ServerStatus> {
     const response = await fetch(`${API}/status`);
 
     if (!response.ok) {
@@ -10,7 +19,14 @@ export async function getStatus() {
     return response.json();
 }
 
-export async function getConfig() {
+/**
+ * Retrieves the current server configuration.
+ *
+ * @returns A promise that resolves to the server configuration.
+ *
+ * @throws {Error} If the API request fails or returns a non-success response.
+ */
+export async function getConfig(): Promise<ServerConfig> {
     const response = await fetch(`${API}/config`);
 
     if (!response.ok) {
@@ -20,7 +36,12 @@ export async function getConfig() {
     return response.json();
 }
 
-export async function refreshAssignments() {
+/**
+ * Requests the server to refresh assignment data.
+ *
+ * @throws {Error} If the server request fails or returns a non-success response.
+ */
+export async function refreshAssignments(): Promise<void> {
     const response = await fetch(`${API}/refresh`, {
         method: "POST",
     });
