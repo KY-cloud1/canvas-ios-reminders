@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { getStatus } from "../api/server";
-import type { ServerStatus } from "../types/server";
+import { getStatus } from "../../api/server";
+import type { ServerStatus } from "../../types/server";
+import styles from "./ServerStatusPanel.module.css";
 
 /**
  * Displays the current backend server status.
@@ -51,7 +52,7 @@ function ServerStatusPanel() {
     }
 
     return (
-        <div>
+        <div className={styles.statusCard}>
             <p>Status: {serverStatus.status}</p>
             <p>Refresh Interval: {serverStatus.refresh_interval} seconds</p>
             <p>Number of Cached Assignments: {serverStatus.cached_assignments}</p>
