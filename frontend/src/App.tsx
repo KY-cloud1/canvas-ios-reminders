@@ -1,5 +1,5 @@
 import './App.css'
-import ServerStatusPanel from './components/ServerStatusPanel/ServerStatusPanel'
+import { ServerStatusPanel } from './components/ServerStatusPanel/ServerStatusPanel'
 
 function App() {
   return (

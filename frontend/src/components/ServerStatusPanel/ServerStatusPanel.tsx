@@ -1,43 +1,18 @@
-import { useEffect, useState } from "react";
-import { getStatus } from "../../api/server";
-import type { ServerStatus } from "../../types/server";
+import { useServerStatus } from "../../hooks/useServerStatus";
 import styles from "./ServerStatusPanel.module.css";
 
 /**
- * Displays the current backend server status.
+ * Renders the current backend server status.
  *
- * Fetches the server status when the component mounts and renders
- * the current status, refresh interval, cache statistics, and the
- * most recent refresh information.
- *
- * Displays appropriate loading and error states while the status
- * is being retrieved.
+ * Displays loading and error states while the server status is being
+ * retrieved and renders the current status information when available.
  */
-function ServerStatusPanel() {
-    const [serverStatus, setServerStatus] = useState<ServerStatus | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-
-    /**
-     * Retrieves the latest server status and updates the component state.
-     */
-    async function loadStatus() {
-        setIsLoading(true);
-
-        try {
-            const status = await getStatus();
-            setServerStatus(status);
-            setError(null);
-        } catch {
-            setError("Failed to fetch server status.");
-        } finally {
-            setIsLoading(false);
-        }
-    }
-
-    useEffect(() => {
-        loadStatus();
-    }, []);
+export function ServerStatusPanel() {
+    const {
+        serverStatus,
+        isLoading,
+        error,
+    } = useServerStatus();
 
     if (isLoading) {
         return <div>Loading status...</div>;
@@ -69,5 +44,3 @@ function ServerStatusPanel() {
         </div>
     );
 }
-
-export default ServerStatusPanel;
