@@ -30,7 +30,6 @@ export function ServerStatusPanel() {
         <div className={styles.statusCard}>
             <h2>Status</h2>
             <p>Status: {serverStatus.status}</p>
-            <p>Refresh Interval: {serverStatus.refresh_interval} seconds</p>
             <p>Number of Cached Assignments: {serverStatus.cached_assignments}</p>
             <p>
                 Last Refresh:{" "}

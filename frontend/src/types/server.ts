@@ -1,6 +1,5 @@
 export interface ServerStatus {
     status: "healthy" | "degraded";
-    refresh_interval: number;
     cached_assignments: number;
     last_refresh: string | null;
     last_refresh_error: string | null;
