@@ -1,4 +1,4 @@
-import type { ServerConfig, ServerStatus } from "../types/server";
+import type { ServerConfig, ServerStatus, ServerRefreshResponse } from "../types/server";
 
 const API = "/api";
 
@@ -38,10 +38,14 @@ export async function getConfig(): Promise<ServerConfig> {
 
 /**
  * Requests the server to refresh assignment data.
+ * 
+ * @returns A promise that resolves to a status indicating the refresh has been 
+ *          started.
  *
- * @throws {Error} If the server request fails or returns a non-success response.
+ * @throws {Error} If the server request fails or returns a non-success 
+ *          response.
  */
-export async function refreshAssignments(): Promise<void> {
+export async function refreshAssignments(): Promise<ServerRefreshResponse> {
     const response = await fetch(`${API}/refresh`, {
         method: "POST",
     });
@@ -49,4 +53,6 @@ export async function refreshAssignments(): Promise<void> {
     if (!response.ok) {
         throw new Error("Failed to refresh assignments with server.");
     }
+
+    return response.json();
 }

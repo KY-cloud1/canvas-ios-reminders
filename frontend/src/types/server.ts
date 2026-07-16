@@ -21,3 +21,7 @@ export interface ServerConfig {
         configured: boolean;
     };
 }
+
+export interface ServerRefreshResponse {
+    status: "refresh_started";
+}
