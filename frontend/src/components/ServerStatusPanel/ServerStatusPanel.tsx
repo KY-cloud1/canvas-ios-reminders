@@ -29,10 +29,10 @@ export function ServerStatusPanel() {
     return (
         <div className={styles.statusCard}>
             <h2>Status</h2>
-            <p>Status: {serverStatus.status}</p>
-            <p>Number of Cached Assignments: {serverStatus.cached_assignments}</p>
+            <p><span className={styles.label}>Status:</span> {serverStatus.status}</p>
+            <p><span className={styles.label}>Number of Cached Assignments:</span> {serverStatus.cached_assignments}</p>
             <p>
-                Last Refresh:{" "}
+                <span className={styles.label}>Last Refresh:</span>{" "}
                 {serverStatus.last_refresh
                     ? new Date(serverStatus.last_refresh).toLocaleString(undefined, {
                         dateStyle: "short",
@@ -40,7 +40,7 @@ export function ServerStatusPanel() {
                     })
                     : "Never"}
             </p>
-            <p>Last Refresh Error: {serverStatus.last_refresh_error ?? "None"}</p>
+            <p><span className={styles.label}>Last Refresh Error:</span> {serverStatus.last_refresh_error ?? "None"}</p>
         </div>
     );
 }

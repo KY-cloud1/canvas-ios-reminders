@@ -30,20 +30,20 @@ export function ServerConfigPanel() {
         <div className={styles.configCard}>
             <h2>Configuration</h2>
             <h3>General:</h3>
-            <p>Refresh Interval: {serverConfig.refresh_interval}</p>
-            <p>Weeks Delta: {serverConfig.weeks_delta}</p>
+            <p><span className={styles.label}>Refresh Interval:</span> {serverConfig.refresh_interval}</p>
+            <p><span className={styles.label}>Weeks Delta:</span> {serverConfig.weeks_delta}</p>
 
             <h3>Canvas:</h3>
-            <p>Enabled: {serverConfig.canvas.enabled ? "Yes" : "No"}</p>
-            <p>Configured: {serverConfig.canvas.configured ? "Yes" : "No"}</p>
+            <p><span className={styles.label}>Enabled:</span> {serverConfig.canvas.enabled ? "Yes" : "No"}</p>
+            <p><span className={styles.label}>Configured:</span> {serverConfig.canvas.configured ? "Yes" : "No"}</p>
 
             <h3>Gradescope:</h3>
-            <p>Enabled: {serverConfig.gradescope.enabled ? "Yes" : "No"}</p>
-            <p>Configured: {serverConfig.gradescope.configured ? "Yes" : "No"}</p>
+            <p><span className={styles.label}>Enabled:</span> {serverConfig.gradescope.enabled ? "Yes" : "No"}</p>
+            <p><span className={styles.label}>Configured:</span> {serverConfig.gradescope.configured ? "Yes" : "No"}</p>
 
             <h3>ngrok:</h3>
-            <p>Enabled: {serverConfig.ngrok.enabled ? "Yes" : "No"}</p>
-            <p>Configured: {serverConfig.ngrok.configured ? "Yes" : "No"}</p>
+            <p><span className={styles.label}>Enabled:</span> {serverConfig.ngrok.enabled ? "Yes" : "No"}</p>
+            <p><span className={styles.label}>Configured:</span> {serverConfig.ngrok.configured ? "Yes" : "No"}</p>
         </div>
     );
 }
