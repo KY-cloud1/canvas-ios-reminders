@@ -5,6 +5,7 @@ dependencies = [
     "fastapi",
     "uvicorn",
     "python-dotenv",
+    "keyring",
 ]
 
 [project.optional-dependencies]
