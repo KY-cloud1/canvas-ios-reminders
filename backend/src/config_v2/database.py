@@ -2,7 +2,20 @@ import sqlite3
 from pathlib import Path
 
 
+# Filepath to the settings file.
 DB_PATH = Path("settings.db")
+
+
+# Default settings used upon initialization.
+DEFAULT_SETTINGS = {
+    "canvas_enabled": "false",
+    "canvas_graphql_url": "",
+    "gradescope_enabled": "false",
+    "refresh_interval": "3600",
+    "weeks_delta": "4",
+    "ngrok_enabled": "false",
+    "ngrok_domain": "",
+}
 
 
 class Database:
@@ -23,11 +36,12 @@ class Database:
         Initialize the database connection.
 
         Creates a connection to the SQLite database if one is not already
-        open. The required settings table is created automatically if it
-        does not exist.
+        open, creates the settings table if necessary, and inserts any
+        missing default settings from DEFAULT_SETTINGS.
 
-        This method may be called multiple times safely. Subsequent calls have
-        no effect while a connection is already open.
+        This method is safe to call multiple times. If the database is
+        already initialized, it returns immediately. Existing settings are
+        not overwritten.
         """
         if cls._conn is not None:
             return
@@ -35,12 +49,23 @@ class Database:
         cls._conn = sqlite3.connect(DB_PATH)
         cls._conn.row_factory = sqlite3.Row
 
-        cls._conn.execute("""
-        CREATE TABLE IF NOT EXISTS settings (
-            key TEXT PRIMARY KEY,
-            value TEXT NOT NULL
-        );
-        """)
+        cls._conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS settings (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL
+            );
+            """
+        )
+
+        for key, value in DEFAULT_SETTINGS.items():
+            cls._conn.execute(
+                """
+                INSERT OR IGNORE INTO settings (key, value)
+                VALUES (?, ?)
+                """,
+                (key, value),
+            )
 
         cls._conn.commit()
 
