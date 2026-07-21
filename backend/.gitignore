@@ -28,6 +28,9 @@ htmlcov/
 build/
 dist/
 
+# SQLite database
+settings.db
+
 # Python packaging metadata
 *.egg-info/
 *.egg
