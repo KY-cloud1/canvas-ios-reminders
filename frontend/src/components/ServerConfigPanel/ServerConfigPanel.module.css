@@ -8,3 +8,7 @@
 .label {
     text-decoration: underline;
 }
+
+.centeredLine {
+    text-align: center;
+}

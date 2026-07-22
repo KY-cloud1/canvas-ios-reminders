@@ -1,15 +1,18 @@
 import './App.css'
 import { ServerConfigPanel } from './components/ServerConfigPanel/ServerConfigPanel'
 import { ServerStatusPanel } from './components/ServerStatusPanel/ServerStatusPanel'
-import { SeverRefreshButton } from './components/SeverRefreshButton/ServerRefreshButton'
+import { ServerRefreshButton } from './components/SeverRefreshButton/ServerRefreshButton'
 
 function App() {
   return (
-    <main>
-      <h1>AssignmentBridge</h1>
-      <ServerStatusPanel />
-      <ServerConfigPanel />
-      <SeverRefreshButton />
+    <main className='App'>
+      <h1 className='title'>AssignmentBridge</h1>
+
+      <div className='panels'>
+        <ServerStatusPanel />
+        <ServerConfigPanel />
+        <ServerRefreshButton />
+      </div>
     </main>
   )
 }

@@ -28,10 +28,10 @@ export function ServerConfigPanel() {
 
     return (
         <div className={styles.configCard}>
-            <h2>Configuration</h2>
+            <h2 className={styles.centeredLine}>Current Configuration</h2>
             <h3>General:</h3>
-            <p><span className={styles.label}>Refresh Interval:</span> {serverConfig.refresh_interval}</p>
-            <p><span className={styles.label}>Weeks Delta:</span> {serverConfig.weeks_delta}</p>
+            <p><span className={styles.label}>Refresh Interval:</span> {serverConfig.refresh_interval} seconds</p>
+            <p><span className={styles.label}>Weeks Delta:</span> {serverConfig.weeks_delta} weeks</p>
 
             <h3>Canvas:</h3>
             <p><span className={styles.label}>Enabled:</span> {serverConfig.canvas.enabled ? "Yes" : "No"}</p>

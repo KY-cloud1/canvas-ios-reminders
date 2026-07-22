@@ -28,7 +28,7 @@ export function ServerStatusPanel() {
 
     return (
         <div className={styles.statusCard}>
-            <h2>Status</h2>
+            <h2 className={styles.centeredLine}>Current Status</h2>
             <p><span className={styles.label}>Status:</span> {serverStatus.status}</p>
             <p><span className={styles.label}>Number of Cached Assignments:</span> {serverStatus.cached_assignments}</p>
             <p>
