@@ -1,3 +1,11 @@
+"""
+Provides secure storage for application secrets.
+
+This module defines the SecretStore class, which wraps the system
+keyring to securely store, retrieve, and delete sensitive application
+credentials.
+"""
+
 import keyring
 from keyring.errors import PasswordDeleteError
 

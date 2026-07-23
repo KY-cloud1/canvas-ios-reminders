@@ -1,3 +1,12 @@
+"""
+Defines the application's runtime configuration.
+
+The Settings dataclass stores configuration values for the
+application, including Canvas, Gradescope, and ngrok settings, as well
+as refresh behavior. Sensitive credentials are populated separately
+from secure storage.
+"""
+
 from dataclasses import dataclass
 
 

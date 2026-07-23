@@ -1,3 +1,11 @@
+"""
+Provides persistent storage for application configuration.
+
+This module manages the application's SQLite settings database,
+including database initialization and operations for storing,
+retrieving, updating, and deleting configuration values.
+"""
+
 import sqlite3
 from pathlib import Path
 
