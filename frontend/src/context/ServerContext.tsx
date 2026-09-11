@@ -2,8 +2,8 @@ import { createContext, useContext, useEffect, useState } from "react";
 import type { ServerStatus } from "../types/server";
 
 interface ServerContextValue {
-    serverStatus: ServerStatus | null;
-    error: string | null;
+  serverStatus: ServerStatus | null;
+  error: string | null;
 }
 
 const ServerContext = createContext<ServerContextValue | null>(null);
@@ -21,33 +21,33 @@ const ServerContext = createContext<ServerContextValue | null>(null);
  *   server context.
  */
 export function ServerProvider({ children }: { children: React.ReactNode }) {
-    const [serverStatus, setServerStatus] = useState<ServerStatus | null>(null);
-    const [error, setError] = useState<string | null>(null);
+  const [serverStatus, setServerStatus] = useState<ServerStatus | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        const events = new EventSource("/api/events");
+  useEffect(() => {
+    const events = new EventSource("/api/events");
 
-        events.addEventListener("server_status", (event) => {
-            try {
-                const status = JSON.parse(event.data) as ServerStatus;
+    events.addEventListener("server_status", (event) => {
+      try {
+        const status = JSON.parse(event.data) as ServerStatus;
 
-                setServerStatus(status);
-                setError(null);
-            } catch {
-                setError("Failed to parse server status update.")
-            }
-        });
+        setServerStatus(status);
+        setError(null);
+      } catch {
+        setError("Failed to parse server status update.");
+      }
+    });
 
-        return () => {
-            events.close();
-        }
-    }, []);
+    return () => {
+      events.close();
+    };
+  }, []);
 
-    return (
-        <ServerContext.Provider value={{ serverStatus, error }}>
-            {children}
-        </ServerContext.Provider>
-    );
+  return (
+    <ServerContext.Provider value={{ serverStatus, error }}>
+      {children}
+    </ServerContext.Provider>
+  );
 }
 
 /**
@@ -60,11 +60,11 @@ export function ServerProvider({ children }: { children: React.ReactNode }) {
  * @throws {Error} If the hook is used outside of a ServerProvider.
  */
 export function useServer() {
-    const context = useContext(ServerContext);
+  const context = useContext(ServerContext);
 
-    if (!context) {
-        throw new Error("useServer must be used within a ServerProvider")
-    }
+  if (!context) {
+    throw new Error("useServer must be used within a ServerProvider");
+  }
 
-    return context;
+  return context;
 }

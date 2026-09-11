@@ -1,39 +1,39 @@
 .settingsCard {
-    display: flex;
-    flex-direction: column;
-    border: 1px solid gray;
-    padding: 16px;
-    min-height: 600px;
-    min-width: 520px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid gray;
+  padding: 16px;
+  min-height: 600px;
+  min-width: 520px;
 }
 
 .label {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
 .centeredLine {
-    text-align: center;
+  text-align: center;
 }
 
 .settingsCard label {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    gap: 4px;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 4px;
 }
 
-.settingsCard label>span {
-    width: 140px;
-    flex-shrink: 0;
+.settingsCard label > span {
+  width: 140px;
+  flex-shrink: 0;
 }
 
 .settingsCard input[type="text"],
 .settingsCard input[type="password"],
 .settingsCard input[type="number"] {
-    flex: 1;
+  flex: 1;
 }
 
 .settingsCard button {
-    display: block;
-    margin: 0 auto;
+  display: block;
+  margin: 0 auto;
 }

@@ -1,16 +1,16 @@
 .statusCard {
-    display: inline-flex;
-    flex-direction: column;
-    border: 1px solid gray;
-    padding: 16px;
-    min-height: 600px;
-    min-width: 300px;
+  display: inline-flex;
+  flex-direction: column;
+  border: 1px solid gray;
+  padding: 16px;
+  min-height: 600px;
+  min-width: 300px;
 }
 
 .label {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
 .centeredLine {
-    text-align: center;
+  text-align: center;
 }
