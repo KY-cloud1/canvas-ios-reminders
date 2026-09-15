@@ -1,75 +1,79 @@
-# React + TypeScript + Vite
+# AssignmentBridge frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The frontend is a React 19 single-page application built with TypeScript and
+Vite. It provides a local dashboard for the AssignmentBridge FastAPI backend.
 
-Currently, two official plugins are available:
+## What it does
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Shows backend health, cached assignment count, refresh time, and refresh
+  errors.
+- Receives live refresh state through a server-sent events connection at
+  `/api/events`.
+- Reads and updates general, Canvas, Gradescope, and ngrok settings.
+- Triggers an on-demand assignment refresh and disables the button while the
+  backend is refreshing.
 
-## React Compiler
+The application is composed around `App`, `ServerProvider`, and three main
+dashboard components:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```text
+src/
+  api/server.ts                         Backend requests
+  components/ServerStatusPanel/         Live server status
+  components/ServerSettingsPanel/       Settings form
+  components/SeverRefreshButton/         Manual refresh control
+  context/ServerContext.tsx              Shared SSE status state
+  hooks/useServerSettings.ts             Settings loading and saving
+  types/server.ts                        API response and request types
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Requirements
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- Node.js
+- pnpm
+- The AssignmentBridge backend running on port `8081` for live data
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Install and run
 
+From this directory:
+
+```bash
+pnpm install
+pnpm dev
 ```
+
+Vite prints the local development URL, normally `http://localhost:5173`.
+Requests to `/api` are proxied to `http://localhost:8081` by
+[`vite.config.ts`](./vite.config.ts), so start the backend separately when
+using the dashboard.
+
+## Commands
+
+```bash
+pnpm dev       # Start Vite with hot module replacement
+pnpm build     # Type-check with tsc and build the dist/ directory
+pnpm lint      # Run ESLint
+pnpm preview   # Serve the built dist/ directory locally
+```
+
+## Backend contract
+
+The frontend expects these backend routes:
+
+- `GET /api/status`
+- `GET /api/settings`
+- `POST /api/settings`
+- `POST /api/refresh`
+- `GET /api/events` (SSE event name: `server_status`)
+
+The frontend does not store credentials. Password and token inputs are sent
+only when a new value is entered; configured credentials are represented by
+boolean flags returned by the backend.
+
+## Production build
+
+Run `pnpm build` to create a static production bundle in `dist/`. The current
+repository config is intended for local development and does not define a
+production API host or deployment target. If the bundle is served separately
+from the backend, configure the hosting layer to route `/api` and
+`/api/events` to the FastAPI service.
