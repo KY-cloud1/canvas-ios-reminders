@@ -23,8 +23,8 @@ from gradescope.client import (
 from schemas.settings import SettingsUpdate
 from sse_starlette import EventSourceResponse
 
-# The port that the local server will run on.
-PORT = 8081
+# The default port that the local server will run on.
+PORT = 9101
 
 
 @asynccontextmanager

@@ -31,7 +31,7 @@ src/
 
 - Node.js
 - pnpm
-- The AssignmentBridge backend running on port `8081` for live data
+- The AssignmentBridge backend running on port `9101` for live data
 
 ## Install and run
 
@@ -43,7 +43,7 @@ pnpm dev
 ```
 
 Vite prints the local development URL, normally `http://localhost:5173`.
-Requests to `/api` are proxied to `http://localhost:8081` by
+Requests to `/api` are proxied to `http://localhost:9101` by
 [`vite.config.ts`](./vite.config.ts), so start the backend separately when
 using the dashboard.
 

@@ -54,7 +54,7 @@ python -m playwright install chromium
 PYTHONPATH=src python -m server
 ```
 
-The API listens on `http://localhost:8081`.
+The API listens on `http://localhost:9101`.
 
 ### 2. Start the frontend
 
@@ -66,7 +66,7 @@ pnpm dev
 
 Open the URL printed by Vite, normally `http://localhost:5173`. During
 development, Vite proxies `/api` requests to the backend at
-`http://localhost:8081`.
+`http://localhost:9101`.
 
 The backend performs an initial refresh during startup. With both integrations
 disabled, it starts with an empty assignment cache; configure at least one

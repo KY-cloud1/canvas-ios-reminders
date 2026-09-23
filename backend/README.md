@@ -7,7 +7,7 @@ keeps them in an in-memory cache, and exposes the cache and server state under
 
 ## Responsibilities
 
-- Run the FastAPI application with Uvicorn on port `8081`.
+- Run the FastAPI application with Uvicorn on port `9101`.
 - Refresh assignments once at startup and periodically thereafter.
 - Fetch Canvas assignments through the Canvas GraphQL API.
 - Fetch Gradescope assignments through Playwright browser automation.
@@ -48,7 +48,7 @@ script. Start it from `backend/` with:
 PYTHONPATH=src python -m server
 ```
 
-The server is available at `http://localhost:8081`. It initializes the
+The server is available at `http://localhost:9101`. It initializes the
 settings database and performs an initial refresh during startup. Stop it with
 `Ctrl+C`.
 
