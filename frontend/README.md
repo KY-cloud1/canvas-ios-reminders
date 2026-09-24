@@ -47,6 +47,17 @@ Requests to `/api` are proxied to `http://localhost:9101` by
 [`vite.config.ts`](./vite.config.ts), so start the backend separately when
 using the dashboard.
 
+To preview the production bundle as served by FastAPI instead of the Vite dev
+server, run:
+
+```bash
+pnpm build
+```
+
+Then start the backend from `backend/` with `PYTHONPATH=src python -m server`.
+The backend serves the app at `http://localhost:9101` and serves the assets
+from `/assets`.
+
 ## Commands
 
 ```bash
@@ -72,8 +83,8 @@ boolean flags returned by the backend.
 
 ## Production build
 
-Run `pnpm build` to create a static production bundle in `dist/`. The current
-repository config is intended for local development and does not define a
-production API host or deployment target. If the bundle is served separately
-from the backend, configure the hosting layer to route `/api` and
-`/api/events` to the FastAPI service.
+Run `pnpm build` to create a static production bundle in `dist/`. The backend
+serves that build directly at `/` and `/assets`, so the app can be opened from
+`http://localhost:9101` without a separate frontend web server. For non-local
+hosting, configure the reverse proxy to route `/api` and `/api/events` to the
+FastAPI service while serving the static app bundle from the backend.

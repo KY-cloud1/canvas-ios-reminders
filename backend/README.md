@@ -3,7 +3,8 @@
 The backend is a FastAPI service that collects upcoming assignments from
 Canvas LMS and Gradescope. It filters records to the configured future window,
 keeps them in an in-memory cache, and exposes the cache and server state under
-`/api`.
+`/api`. When the frontend has been built, the same FastAPI app also serves the
+React bundle from `/` and static assets from `/assets`.
 
 ## Responsibilities
 
@@ -49,8 +50,20 @@ PYTHONPATH=src python -m server
 ```
 
 The server is available at `http://localhost:9101`. It initializes the
-settings database and performs an initial refresh during startup. Stop it with
-`Ctrl+C`.
+settings database and performs an initial refresh during startup. If the
+frontend bundle exists in `frontend/dist`, the server serves it at `/` and the
+static assets it references under `/assets`. Stop it with `Ctrl+C`.
+
+To serve the frontend from the backend, build it first from the frontend
+project:
+
+```bash
+cd ../frontend
+pnpm install
+pnpm build
+cd ../backend
+PYTHONPATH=src python -m server
+```
 
 For direct integration checks, after configuring credentials:
 

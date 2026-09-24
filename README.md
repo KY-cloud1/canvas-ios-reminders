@@ -41,11 +41,37 @@ frontend/
 
 ## Quick start
 
-Open two terminals from the repository root.
+### Default workflow: backend serves the built frontend
 
-### 1. Start the backend
+Build the frontend bundle once, then start the backend from the repository root.
 
 ```bash
+cd frontend
+pnpm install
+pnpm build
+
+cd ../backend
+python -m venv .venv
+source .venv/bin/activate       # Windows: .venv\Scripts\activate
+pip install -e .
+python -m playwright install chromium
+PYTHONPATH=src python -m server
+```
+
+Open `http://localhost:9101`. The backend serves the built React app from `/`
+and its static assets from `/assets`, while the API remains under `/api`.
+
+The backend performs an initial refresh during startup. With both integrations
+disabled, it starts with an empty assignment cache; configure at least one
+integration in the frontend before refreshing.
+
+### Alternative development workflow: run Vite and FastAPI separately
+
+If you want the live React dev server while working on frontend code, open two
+terminals from the repository root:
+
+```bash
+# Terminal 1: backend
 cd backend
 python -m venv .venv
 source .venv/bin/activate       # Windows: .venv\Scripts\activate
@@ -54,23 +80,16 @@ python -m playwright install chromium
 PYTHONPATH=src python -m server
 ```
 
-The API listens on `http://localhost:9101`.
-
-### 2. Start the frontend
-
 ```bash
+# Terminal 2: frontend
 cd frontend
 pnpm install
 pnpm dev
 ```
 
-Open the URL printed by Vite, normally `http://localhost:5173`. During
-development, Vite proxies `/api` requests to the backend at
+Open the Vite URL printed by the frontend, normally `http://localhost:5173`.
+During Vite development, `/api` requests are proxied to the backend at
 `http://localhost:9101`.
-
-The backend performs an initial refresh during startup. With both integrations
-disabled, it starts with an empty assignment cache; configure at least one
-integration in the frontend before refreshing.
 
 ## Configuration
 
