@@ -10,12 +10,15 @@ import json
 from contextlib import asynccontextmanager
 from dataclasses import replace
 from datetime import UTC, datetime
+from pathlib import Path
 
 import ngrok
 import uvicorn
 from canvas.client import CanvasApi, filter_canvas_assignments
 from config import SettingsManager
 from fastapi import APIRouter, BackgroundTasks, FastAPI, Request
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from gradescope.client import (
     GradescopeAutomation,
     filter_gradescope_assignments,
@@ -25,6 +28,10 @@ from sse_starlette import EventSourceResponse
 
 # The default port that the local server will run on.
 PORT = 9101
+
+# File directory paths.
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+FRONTEND_DIR = BASE_DIR / "frontend" / "dist"
 
 
 @asynccontextmanager
@@ -77,7 +84,14 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
 api = APIRouter(prefix="/api")
+
+app.mount(
+    "/assets",
+    StaticFiles(directory=FRONTEND_DIR / "assets"),
+    name="assets",
+)
 
 app.state.cached_assignments = []
 app.state.last_refresh = None
@@ -285,7 +299,15 @@ def get_settings() -> dict[str, object]:
 @api.post("/settings")
 def set_settings(new_settings: SettingsUpdate) -> dict[str, str]:
     """
-    Docstring
+    Updates and saves the server's runtime settings.
+
+    Args:
+        new_settings (SettingsUpdate): The settings values to update.
+            Only fields provided in the request are modified.
+
+    Returns:
+        dict[str, str]: Status message indicating that the settings
+            were saved successfully.
     """
     settings = SettingsManager.get()
 
@@ -376,6 +398,17 @@ async def server_events(request: Request) -> EventSourceResponse:
         event_generator(),
         ping=30,  # 30 second SSE heartbeat.
     )
+
+
+@app.get("/")
+async def serve_frontend():
+    """
+    Serves the built React frontend application.
+
+    Returns:
+        FileResponse: The frontend's index.html file.
+    """
+    return FileResponse(FRONTEND_DIR / "index.html")
 
 
 app.include_router(api)
